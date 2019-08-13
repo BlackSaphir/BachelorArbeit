@@ -1,0 +1,17 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{C3DA3EF0-48FC-3DC3-AED5-B792715683E2}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "BachelorArbeit",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"UMG"
+			]
+		}
+	]
+}
