@@ -37,7 +37,9 @@ class BACHELORARBEIT_API UBA_GameInstance : public UGameInstance
 	virtual void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnStartOnlineGameComplete(FName SessionName, bool bWasSuccessful);
 
-	//UFUNCTION(BlueprintCallable, Category = "Multiplayer")
+	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
+	void StartSession();
+
 	bool HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLan, bool bIsPresence, int32 MaxNumPlayers);
 
 	TSharedPtr<class FOnlineSessionSettings> SessionSettings;
