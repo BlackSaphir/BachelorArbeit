@@ -4,7 +4,10 @@
 #include "BA_GameInstance.h"
 #include "OnlineSubsystemImpl.h"
 #include "OnlineSessionSettings.h"
+#include "Interfaces/OnlineSessionInterface.h"
 #include "Templates/SharedPointer.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/Actor.h"
 
 UBA_GameInstance::UBA_GameInstance(const FObjectInitializer& ObjectInitializer)
 {
@@ -53,12 +56,94 @@ bool UBA_GameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName 
 	return false;
 }
 
+
 void UBA_GameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+	if (OnlineSub)
+	{
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
 
+		if (Sessions.IsValid())
+		{
+			Sessions->ClearOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegateHandle);
+			if (bWasSuccessful)
+			{
+				OnStartSessionCompleteDelegateHandle = Sessions->AddOnStartSessionCompleteDelegate_Handle(OnStartSessionCompleteDelegate);
+				Sessions->StartSession(SessionName);
+			}
+		}
+	}
 }
 
 void UBA_GameInstance::OnStartOnlineGameComplete(FName SessionName, bool bWasSuccessful)
 {
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+	if (OnlineSub)
+	{
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+		if (Sessions.IsValid())
+		{
+			Sessions->ClearOnStartSessionCompleteDelegate_Handle(OnStartSessionCompleteDelegateHandle);
+		}
+	}
 
+	if (bWasSuccessful)
+	{
+		UWorld* world = GetWorld();
+		UGameplayStatics::OpenLevel(world, "Map_AR", true, "listen");
+	}
+}
+
+void UBA_GameInstance::FindSession(TSharedPtr<const FUniqueNetId> UserId, bool bIsLan, bool bIsPresence)
+{
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+	if (OnlineSub)
+	{
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+		if (Sessions.IsValid()&& UserId.IsValid())
+		{
+			SessionSearch = MakeShareable(new FOnlineSessionSearch());
+
+			SessionSearch->bIsLanQuery = bIsLan;
+			SessionSearch->MaxSearchResults = 20;
+			SessionSearch->PingBucketSize = 50;
+
+			if (bIsPresence)
+			{
+				SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, bIsPresence, EOnlineComparisonOp::Equals);
+			}
+
+			TSharedRef<FOnlineSessionSearch> SearchSettingsRef = SessionSearch.ToSharedRef();
+
+			OnFindSessionCompleteDelegateHandle = Sessions->AddOnFindSessionsCompleteDelegate_Handle(OnFindSessionCompleteDelegate);
+
+			Sessions->FindSessions(*UserId, SearchSettingsRef);
+		}
+	}
+	else
+	{
+		OnFindSessionComplete(false);
+	}
+}
+
+void UBA_GameInstance::OnFindSessionComplete(bool bWasSuccessful)
+{
+	IOnlineSubsystem* const OnlineSub = IOnlineSubsystem::Get();
+	if (OnlineSub)
+	{
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+
+		if (Sessions.IsValid())
+		{
+			Sessions->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionCompleteDelegateHandle);
+
+			const TArray<FOnlineSessionSearchResult> Results = SessionSearch->SearchResults;
+			
+			if ()
+			{
+
+			}
+		}
+	}
 }

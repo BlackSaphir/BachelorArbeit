@@ -18,6 +18,22 @@ class BACHELORARBEIT_API UBA_GameInstance : public UGameInstance
 		UBA_GameInstance(const FObjectInitializer& ObjectInitializer);
 
 
+	// Functions
+	virtual void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
+	void OnStartOnlineGameComplete(FName SessionName, bool bWasSuccessful);
+	void OnFindSessionComplete(bool bWasSuccessful);
+
+	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
+	void StartSession();
+
+	bool HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLan, bool bIsPresence, int32 MaxNumPlayers);
+	void FindSession(TSharedPtr<const FUniqueNetId> UserId, bool bIsLan, bool bIsPresence);
+
+
+
+	// Variables
+	TSharedPtr<class FOnlineSessionSettings> SessionSettings;
+	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
 
 	// Delegates
 	FOnCreateSessionCompleteDelegate OnCreateSessionCompleteDelegate;
@@ -25,23 +41,14 @@ class BACHELORARBEIT_API UBA_GameInstance : public UGameInstance
 	FOnFindSessionsCompleteDelegate OnFindSessionCompleteDelegate;
 	FOnJoinSessionCompleteDelegate OnJoinSessionCompleteDelegate;
 	FOnDestroySessionCompleteDelegate OnDestroySessionCompleteDelegate;
+	FOnFindSessionsCompleteDelegate OnFindSessionCompleteDelegate;
+
 
 	FDelegateHandle OnCreateSessionCompleteDelegateHandle;
 	FDelegateHandle	OnStartSessionCompleteDelegateHandle;
 	FDelegateHandle OnFindSessionCompleteDelegateHandle;
 	FDelegateHandle OnJoinSessionCompleteDelegateHandle;
 	FDelegateHandle OnDestroySessionCompeteDelegateHandle;
-
-
-	//Functions
-	virtual void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
-	void OnStartOnlineGameComplete(FName SessionName, bool bWasSuccessful);
-
-	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
-	void StartSession();
-
-	bool HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLan, bool bIsPresence, int32 MaxNumPlayers);
-
-	TSharedPtr<class FOnlineSessionSettings> SessionSettings;
+	FDelegateHandle OnFindSessionCompleteDelegateHandle;
 
 };
