@@ -7,21 +7,23 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Templates/SharedPointer.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameFramework/Actor.h"
+#include "Engine/LocalPlayer.h"
 
 UBA_GameInstance::UBA_GameInstance(const FObjectInitializer& ObjectInitializer)
 {
+	/** Bind function for CREATING a Session */
 	OnCreateSessionCompleteDelegate = FOnCreateSessionCompleteDelegate::CreateUObject(this, &UBA_GameInstance::OnCreateSessionComplete);
+	/** Bind function for STARTING a Session */
 	OnStartSessionCompleteDelegate = FOnStartSessionCompleteDelegate::CreateUObject(this, &UBA_GameInstance::OnStartOnlineGameComplete);
-	//OnFindSessionCompleteDelegate = FOnFindSessionsCompleteDelegate::CreateUObject(this, &UBA_GameInstance::OnFind)
+	/** Bind function for FINDING a Session */
+	OnFindSessionCompleteDelegate = FOnFindSessionsCompleteDelegate::CreateUObject(this, &UBA_GameInstance::OnFindSessionComplete);
+	/** Bind function for JOINING a Session */
+	OnJoinSessionCompleteDelegate = FOnJoinSessionCompleteDelegate::CreateUObject(this, &UBA_GameInstance::OnJoinSessionComplete);
+	/** Bind function for DESTROYING a Session */
+	OnDestroySessionCompleteDelegate = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UBA_GameInstance::OnDestroySessionComplete);
 }
 
-void UBA_GameInstance::StartSession()
-{
-	ULocalPlayer* const Player = GetFirstGamePlayer();
 
-	//HostSession(Player->GetPreferred(UniqueNetId(), true, true);
-}
 
 bool UBA_GameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLan, bool bIsPresence, int32 MaxNumPlayers)
 {
@@ -91,7 +93,7 @@ void UBA_GameInstance::OnStartOnlineGameComplete(FName SessionName, bool bWasSuc
 	if (bWasSuccessful)
 	{
 		UWorld* world = GetWorld();
-		UGameplayStatics::OpenLevel(world, "Map_AR", true, "listen");
+		UGameplayStatics::OpenLevel(this, "Map_AR", true, "listen");
 	}
 }
 
@@ -101,9 +103,9 @@ void UBA_GameInstance::FindSession(TSharedPtr<const FUniqueNetId> UserId, bool b
 	if (OnlineSub)
 	{
 		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
-		if (Sessions.IsValid()&& UserId.IsValid())
+		if (Sessions.IsValid() && UserId.IsValid())
 		{
-			SessionSearch = MakeShareable(new FOnlineSessionSearch());
+			SessionSearch = MakeShareable(new FOnlineSessionSearch);
 
 			SessionSearch->bIsLanQuery = bIsLan;
 			SessionSearch->MaxSearchResults = 20;
@@ -127,6 +129,7 @@ void UBA_GameInstance::FindSession(TSharedPtr<const FUniqueNetId> UserId, bool b
 	}
 }
 
+
 void UBA_GameInstance::OnFindSessionComplete(bool bWasSuccessful)
 {
 	IOnlineSubsystem* const OnlineSub = IOnlineSubsystem::Get();
@@ -138,12 +141,140 @@ void UBA_GameInstance::OnFindSessionComplete(bool bWasSuccessful)
 		{
 			Sessions->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionCompleteDelegateHandle);
 
-			const TArray<FOnlineSessionSearchResult> Results = SessionSearch->SearchResults;
-			
-			if ()
+			if (SessionSearch->SearchResults.Num() > 0 && bWasSuccessful == true)
 			{
-
+				CanJoinSession = true;
 			}
+
+		}
+	}
+}
+
+
+
+bool UBA_GameInstance::JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult SearchResult)
+{
+	bool bSuccessful = false;
+
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+
+	if (OnlineSub)
+	{
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+
+		if (Sessions.IsValid() && UserId.IsValid())
+		{
+			OnJoinSessionCompleteDelegateHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(OnJoinSessionCompleteDelegate);
+
+			bSuccessful = Sessions->JoinSession(*UserId, SessionName, SearchResult);
+		}
+	}
+	return bSuccessful;
+}
+
+void UBA_GameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
+{
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+
+	if (OnlineSub)
+	{
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+
+		if (Sessions.IsValid())
+		{
+			Sessions->ClearOnJoinSessionCompleteDelegate_Handle(OnJoinSessionCompleteDelegateHandle);
+
+			APlayerController* const PlayerController = GetFirstLocalPlayerController();
+
+			FString TravelURL;
+
+			if (PlayerController && Sessions->GetResolvedConnectString(SessionName, TravelURL))
+			{
+				PlayerController->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
+			}
+		}
+	}
+}
+
+
+void UBA_GameInstance::OnDestroySessionComplete(FName SessionName, bool bWasSuccessful)
+{
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+
+	if (OnlineSub)
+	{
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+
+		if (Sessions.IsValid())
+		{
+			Sessions->ClearOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompeteDelegateHandle);
+
+			if (bWasSuccessful)
+			{
+				UGameplayStatics::OpenLevel(this, "Map_Menu", true);
+			}
+		}
+	}
+}
+
+
+void UBA_GameInstance::StartOnlineSession()
+{
+	ULocalPlayer* const Player = GetFirstGamePlayer();
+
+	HostSession(Player->GetPreferredUniqueNetId().GetUniqueNetId(), GameSessionName, true, true, 2);
+}
+
+void UBA_GameInstance::FindOnlineSession()
+{
+	ULocalPlayer* const Player = GetFirstGamePlayer();
+
+	FindSession(Player->GetPreferredUniqueNetId().GetUniqueNetId(), true, true);
+}
+
+void UBA_GameInstance::JoinOnlineSession()
+{
+	ULocalPlayer* const Player = GetFirstGamePlayer();
+
+	FOnlineSessionSearchResult SearchResult;
+
+	if (SessionSearch.IsValid())
+	{
+
+		if (SessionSearch->SearchResults.Num() > 0)
+		{
+			for (int32 i = 0; i < SessionSearch->SearchResults.Num(); i++)
+			{
+				if (SessionSearch->SearchResults[i].Session.OwningUserId != Player->GetPreferredUniqueNetId())
+				{
+					SearchResult = SessionSearch->SearchResults[i];
+
+					JoinSession(Player->GetPreferredUniqueNetId().GetUniqueNetId(), GameSessionName, SearchResult);
+					break;
+
+				}
+			}
+		}
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("SessionSearch not valid"));
+	}
+}
+
+void UBA_GameInstance::DestroyOnlineSession()
+{
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+
+	if (OnlineSub)
+	{
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+
+		if (Sessions.IsValid())
+		{
+			Sessions->AddOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegate);
+
+			Sessions->DestroySession(GameSessionName);
 		}
 	}
 }

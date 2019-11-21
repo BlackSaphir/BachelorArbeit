@@ -22,23 +22,42 @@ class BACHELORARBEIT_API UBA_GameInstance : public UGameInstance
 	virtual void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnStartOnlineGameComplete(FName SessionName, bool bWasSuccessful);
 	void OnFindSessionComplete(bool bWasSuccessful);
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+	virtual void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 
-	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
-	void StartSession();
 
 	bool HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLan, bool bIsPresence, int32 MaxNumPlayers);
 	void FindSession(TSharedPtr<const FUniqueNetId> UserId, bool bIsLan, bool bIsPresence);
+	bool JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult SearchResult);
 
+	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
+		void StartOnlineSession();
 
+	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
+		void FindOnlineSession();
+
+	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
+		void JoinOnlineSession();
+
+	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
+		void DestroyOnlineSession();
 
 	// Variables
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadonly, Category = "Multiplayer")
+		bool CanJoinSession;
+
+private:
+
 	TSharedPtr<class FOnlineSessionSettings> SessionSettings;
 	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
 
 	// Delegates
 	FOnCreateSessionCompleteDelegate OnCreateSessionCompleteDelegate;
 	FOnStartSessionCompleteDelegate OnStartSessionCompleteDelegate;
-	FOnFindSessionsCompleteDelegate OnFindSessionCompleteDelegate;
+	FOnFindSessionsCompleteDelegate OnFindSessionsCompleteDelegate;
 	FOnJoinSessionCompleteDelegate OnJoinSessionCompleteDelegate;
 	FOnDestroySessionCompleteDelegate OnDestroySessionCompleteDelegate;
 	FOnFindSessionsCompleteDelegate OnFindSessionCompleteDelegate;
@@ -46,7 +65,7 @@ class BACHELORARBEIT_API UBA_GameInstance : public UGameInstance
 
 	FDelegateHandle OnCreateSessionCompleteDelegateHandle;
 	FDelegateHandle	OnStartSessionCompleteDelegateHandle;
-	FDelegateHandle OnFindSessionCompleteDelegateHandle;
+	FDelegateHandle OnFindSessionsCompleteDelegateHandle;
 	FDelegateHandle OnJoinSessionCompleteDelegateHandle;
 	FDelegateHandle OnDestroySessionCompeteDelegateHandle;
 	FDelegateHandle OnFindSessionCompleteDelegateHandle;
