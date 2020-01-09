@@ -8,6 +8,8 @@
 #include "Templates/SharedPointer.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/LocalPlayer.h"
+#include "GameFramework/GameSession.h"
+
 
 UBA_GameInstance::UBA_GameInstance(const FObjectInitializer& ObjectInitializer)
 {
@@ -16,7 +18,9 @@ UBA_GameInstance::UBA_GameInstance(const FObjectInitializer& ObjectInitializer)
 	/** Bind function for STARTING a Session */
 	OnStartSessionCompleteDelegate = FOnStartSessionCompleteDelegate::CreateUObject(this, &UBA_GameInstance::OnStartOnlineGameComplete);
 	/** Bind function for FINDING a Session */
-	OnFindSessionCompleteDelegate = FOnFindSessionsCompleteDelegate::CreateUObject(this, &UBA_GameInstance::OnFindSessionComplete);
+	OnFindSessionsCompleteDelegate = FOnFindSessionsCompleteDelegate::CreateUObject(this, &UBA_GameInstance::OnFindSessionsComplete);
+	/** Bind function for SEARCHING a Session*/
+	//OnSearchSessionsCompleteDelegateHandle = Fonsearch
 	/** Bind function for JOINING a Session */
 	OnJoinSessionCompleteDelegate = FOnJoinSessionCompleteDelegate::CreateUObject(this, &UBA_GameInstance::OnJoinSessionComplete);
 	/** Bind function for DESTROYING a Session */
@@ -61,6 +65,8 @@ bool UBA_GameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName 
 
 void UBA_GameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Host joined")));
+
 	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
 	if (OnlineSub)
 	{
@@ -105,32 +111,33 @@ void UBA_GameInstance::FindSession(TSharedPtr<const FUniqueNetId> UserId, bool b
 		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
 		if (Sessions.IsValid() && UserId.IsValid())
 		{
-			SessionSearch = MakeShareable(new FOnlineSessionSearch);
+			SessionSearch = MakeShareable(new FOnlineSessionSearch());
 
 			SessionSearch->bIsLanQuery = bIsLan;
 			SessionSearch->MaxSearchResults = 20;
 			SessionSearch->PingBucketSize = 50;
+		
 
 			if (bIsPresence)
 			{
-				SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, bIsPresence, EOnlineComparisonOp::Equals);
+				SessionSearch->QuerySettings.Set(SETTING_MAPNAME, FString("Map_AR"), EOnlineComparisonOp::Equals);
 			}
 
 			TSharedRef<FOnlineSessionSearch> SearchSettingsRef = SessionSearch.ToSharedRef();
 
-			OnFindSessionCompleteDelegateHandle = Sessions->AddOnFindSessionsCompleteDelegate_Handle(OnFindSessionCompleteDelegate);
+			OnFindSessionsCompleteDelegateHandle = Sessions->AddOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegate);
 
 			Sessions->FindSessions(*UserId, SearchSettingsRef);
 		}
 	}
 	else
 	{
-		OnFindSessionComplete(false);
+		OnFindSessionsComplete(false);
 	}
 }
 
 
-void UBA_GameInstance::OnFindSessionComplete(bool bWasSuccessful)
+void UBA_GameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 {
 	IOnlineSubsystem* const OnlineSub = IOnlineSubsystem::Get();
 	if (OnlineSub)
@@ -139,10 +146,12 @@ void UBA_GameInstance::OnFindSessionComplete(bool bWasSuccessful)
 
 		if (Sessions.IsValid())
 		{
-			Sessions->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionCompleteDelegateHandle);
+			Sessions->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegateHandle);
 
 			if (SessionSearch->SearchResults.Num() > 0 && bWasSuccessful == true)
 			{
+				GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Can Join Session True")));
+
 				CanJoinSession = true;
 			}
 
@@ -195,7 +204,6 @@ void UBA_GameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCo
 		}
 	}
 }
-
 
 void UBA_GameInstance::OnDestroySessionComplete(FName SessionName, bool bWasSuccessful)
 {

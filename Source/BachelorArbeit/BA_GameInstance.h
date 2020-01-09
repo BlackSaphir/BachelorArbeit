@@ -21,7 +21,7 @@ class BACHELORARBEIT_API UBA_GameInstance : public UGameInstance
 	// Functions
 	virtual void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnStartOnlineGameComplete(FName SessionName, bool bWasSuccessful);
-	void OnFindSessionComplete(bool bWasSuccessful);
+	void OnFindSessionsComplete(bool bWasSuccessful);
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 	virtual void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 
@@ -51,6 +51,8 @@ public:
 
 private:
 
+	//IOnlineSessionPtr Sessions;
+
 	TSharedPtr<class FOnlineSessionSettings> SessionSettings;
 	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
 
@@ -60,14 +62,13 @@ private:
 	FOnFindSessionsCompleteDelegate OnFindSessionsCompleteDelegate;
 	FOnJoinSessionCompleteDelegate OnJoinSessionCompleteDelegate;
 	FOnDestroySessionCompleteDelegate OnDestroySessionCompleteDelegate;
-	FOnFindSessionsCompleteDelegate OnFindSessionCompleteDelegate;
 
 
 	FDelegateHandle OnCreateSessionCompleteDelegateHandle;
 	FDelegateHandle	OnStartSessionCompleteDelegateHandle;
+	FDelegateHandle OnSearchSessionsCompleteDelegateHandle;
 	FDelegateHandle OnFindSessionsCompleteDelegateHandle;
 	FDelegateHandle OnJoinSessionCompleteDelegateHandle;
 	FDelegateHandle OnDestroySessionCompeteDelegateHandle;
-	FDelegateHandle OnFindSessionCompleteDelegateHandle;
 
 };
