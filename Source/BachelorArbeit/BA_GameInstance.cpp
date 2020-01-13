@@ -18,7 +18,7 @@ UBA_GameInstance::UBA_GameInstance(const FObjectInitializer& ObjectInitializer)
 	/** Bind function for STARTING a Session */
 	OnStartSessionCompleteDelegate = FOnStartSessionCompleteDelegate::CreateUObject(this, &UBA_GameInstance::OnStartOnlineGameComplete);
 	/** Bind function for FINDING a Session */
-	OnFindSessionsCompleteDelegate = FOnFindSessionsCompleteDelegate::CreateUObject(this, &UBA_GameInstance::OnFindSessionsComplete);
+	OnFindSessionsCompleteDelegate = FOnFindSessionsCompleteDelegate::CreateUObject(this, &UBA_GameInstance::OnFindSessionComplete);
 	/** Bind function for SEARCHING a Session*/
 	//OnSearchSessionsCompleteDelegateHandle = Fonsearch
 	/** Bind function for JOINING a Session */
@@ -44,7 +44,7 @@ bool UBA_GameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName 
 			SessionSettings->bIsLANMatch = bIsLan;
 			SessionSettings->bUsesPresence = bIsPresence;
 			SessionSettings->NumPublicConnections = MaxNumPlayers;
-			SessionSettings->NumPrivateConnections = 0;
+			SessionSettings->NumPrivateConnections = 2;
 			SessionSettings->bAllowInvites = true;
 			SessionSettings->bShouldAdvertise = true;
 			SessionSettings->bAllowJoinViaPresence = true;
@@ -55,6 +55,10 @@ bool UBA_GameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName 
 			OnCreateSessionCompleteDelegateHandle = Sessions->AddOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegate);
 
 			return Sessions->CreateSession(*UserId, SessionName, *SessionSettings);
+		}
+		else
+		{
+			OnCreateSessionComplete(SessionName, false);
 		}
 	}
 
@@ -111,6 +115,8 @@ void UBA_GameInstance::FindSession(TSharedPtr<const FUniqueNetId> UserId, bool b
 		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
 		if (Sessions.IsValid() && UserId.IsValid())
 		{
+			OnFindSessionsComplete.RemoveAll(this);
+
 			SessionSearch = MakeShareable(new FOnlineSessionSearch());
 
 			SessionSearch->bIsLanQuery = bIsLan;
@@ -132,12 +138,12 @@ void UBA_GameInstance::FindSession(TSharedPtr<const FUniqueNetId> UserId, bool b
 	}
 	else
 	{
-		OnFindSessionsComplete(false);
+		OnFindSessionComplete(false);
 	}
 }
 
 
-void UBA_GameInstance::OnFindSessionsComplete(bool bWasSuccessful)
+void UBA_GameInstance::OnFindSessionComplete(bool bWasSuccessful)
 {
 	IOnlineSubsystem* const OnlineSub = IOnlineSubsystem::Get();
 	if (OnlineSub)
@@ -154,6 +160,8 @@ void UBA_GameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 
 				CanJoinSession = true;
 			}
+
+			OnFindSessionsComplete.Broadcast(bWasSuccessful);
 
 		}
 	}

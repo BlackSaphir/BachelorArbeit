@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "Interfaces/OnlineSessionInterface.h"
+#include "Online.h"
 #include "BA_GameInstance.generated.h"
 
 /**
@@ -21,7 +22,7 @@ class BACHELORARBEIT_API UBA_GameInstance : public UGameInstance
 	// Functions
 	virtual void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnStartOnlineGameComplete(FName SessionName, bool bWasSuccessful);
-	void OnFindSessionsComplete(bool bWasSuccessful);
+	void OnFindSessionComplete(bool bWasSuccessful);
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 	virtual void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 
@@ -63,6 +64,8 @@ private:
 	FOnJoinSessionCompleteDelegate OnJoinSessionCompleteDelegate;
 	FOnDestroySessionCompleteDelegate OnDestroySessionCompleteDelegate;
 
+	FOnFindSessionsComplete OnFindSessionsComplete;
+	
 
 	FDelegateHandle OnCreateSessionCompleteDelegateHandle;
 	FDelegateHandle	OnStartSessionCompleteDelegateHandle;
