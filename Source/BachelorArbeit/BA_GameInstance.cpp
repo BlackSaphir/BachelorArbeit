@@ -122,7 +122,7 @@ void UBA_GameInstance::FindSession(TSharedPtr<const FUniqueNetId> UserId, bool b
 			SessionSearch->bIsLanQuery = bIsLan;
 			SessionSearch->MaxSearchResults = 20;
 			SessionSearch->PingBucketSize = 50;
-		
+
 
 			if (bIsPresence)
 			{
@@ -145,6 +145,8 @@ void UBA_GameInstance::FindSession(TSharedPtr<const FUniqueNetId> UserId, bool b
 
 void UBA_GameInstance::OnFindSessionComplete(bool bWasSuccessful)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("OnFindSessionComplete")));
+
 	IOnlineSubsystem* const OnlineSub = IOnlineSubsystem::Get();
 	if (OnlineSub)
 	{
@@ -152,6 +154,8 @@ void UBA_GameInstance::OnFindSessionComplete(bool bWasSuccessful)
 
 		if (Sessions.IsValid())
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Num Search Results: %d"), SessionSearch->SearchResults.Num()));
+
 			Sessions->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegateHandle);
 
 			if (SessionSearch->SearchResults.Num() > 0 && bWasSuccessful == true)
