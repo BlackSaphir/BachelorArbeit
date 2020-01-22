@@ -49,6 +49,7 @@ bool UBA_GameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName 
 			SessionSettings->bShouldAdvertise = true;
 			SessionSettings->bAllowJoinViaPresence = true;
 			SessionSettings->bAllowJoinViaPresenceFriendsOnly = false;
+			SessionSettings->bIsDedicated = false;
 
 			SessionSettings->Set(SETTING_MAPNAME, FString("Map_AR"), EOnlineDataAdvertisementType::ViaOnlineService);
 
