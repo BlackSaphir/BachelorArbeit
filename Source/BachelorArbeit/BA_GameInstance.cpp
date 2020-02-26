@@ -9,6 +9,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/GameSession.h"
+#include "OnlineSubsystemTypes.h"
+
 
 
 UBA_GameInstance::UBA_GameInstance(const FObjectInitializer& ObjectInitializer)
@@ -55,6 +57,8 @@ bool UBA_GameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName 
 
 			OnCreateSessionCompleteDelegateHandle = Sessions->AddOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegate);
 
+			//FOnlineSessionInfo
+
 			return Sessions->CreateSession(*UserId, SessionName, *SessionSettings);
 		}
 		else
@@ -70,7 +74,6 @@ bool UBA_GameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName 
 
 void UBA_GameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Host joined")));
 
 	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
 	if (OnlineSub)
@@ -123,6 +126,7 @@ void UBA_GameInstance::FindSession(TSharedPtr<const FUniqueNetId> UserId, bool b
 			SessionSearch->bIsLanQuery = bIsLan;
 			SessionSearch->MaxSearchResults = 20;
 			SessionSearch->PingBucketSize = 50;
+			SessionSearch->TimeoutInSeconds = 5;
 
 
 			if (bIsPresence)
@@ -146,7 +150,6 @@ void UBA_GameInstance::FindSession(TSharedPtr<const FUniqueNetId> UserId, bool b
 
 void UBA_GameInstance::OnFindSessionComplete(bool bWasSuccessful)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("OnFindSessionComplete")));
 
 	IOnlineSubsystem* const OnlineSub = IOnlineSubsystem::Get();
 	if (OnlineSub)
@@ -155,13 +158,11 @@ void UBA_GameInstance::OnFindSessionComplete(bool bWasSuccessful)
 
 		if (Sessions.IsValid())
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Num Search Results: %d"), SessionSearch->SearchResults.Num()));
 
 			Sessions->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegateHandle);
 
 			if (SessionSearch->SearchResults.Num() > 0 && bWasSuccessful == true)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Can Join Session True")));
 
 				CanJoinSession = true;
 			}
@@ -279,7 +280,6 @@ void UBA_GameInstance::JoinOnlineSession()
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("SessionSearch not valid"));
 	}
 }
 
