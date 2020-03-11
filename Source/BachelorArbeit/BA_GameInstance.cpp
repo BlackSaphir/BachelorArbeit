@@ -57,8 +57,6 @@ bool UBA_GameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName 
 
 			OnCreateSessionCompleteDelegateHandle = Sessions->AddOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegate);
 
-			//FOnlineSessionInfo
-
 			return Sessions->CreateSession(*UserId, SessionName, *SessionSettings);
 		}
 		else
