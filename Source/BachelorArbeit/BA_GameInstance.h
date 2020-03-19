@@ -52,7 +52,6 @@ public:
 
 private:
 
-	//IOnlineSessionPtr Sessions;
 
 	TSharedPtr<class FOnlineSessionSettings> SessionSettings;
 	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
