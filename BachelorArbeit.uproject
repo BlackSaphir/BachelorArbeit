@@ -14,6 +14,22 @@
 			]
 		}
 	],
+	"Plugins": [
+		{
+			"Name": "AppleARKit",
+			"Enabled": true,
+			"SupportedTargetPlatforms": [
+				"IOS"
+			]
+		},
+		{
+			"Name": "AppleARKitFaceSupport",
+			"Enabled": true,
+			"SupportedTargetPlatforms": [
+				"IOS"
+			]
+		}
+	],
 	"TargetPlatforms": [
 		"IOS",
 		"MacNoEditor",
