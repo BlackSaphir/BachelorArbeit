@@ -15,7 +15,6 @@ UCLASS()
 class BACHELORARBEIT_API UBA_GameInstance : public UGameInstance
 {
 	GENERATED_BODY()
-
 		UBA_GameInstance(const FObjectInitializer& ObjectInitializer);
 
 
@@ -29,7 +28,7 @@ class BACHELORARBEIT_API UBA_GameInstance : public UGameInstance
 
 	bool HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLan, bool bIsPresence, int32 MaxNumPlayers);
 	void FindSession(TSharedPtr<const FUniqueNetId> UserId, bool bIsLan, bool bIsPresence);
-	bool JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult SearchResult);
+	bool JoiningSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult SearchResult);
 
 	UFUNCTION(BlueprintCallable, Category = "Multiplayer")
 		void StartOnlineSession();

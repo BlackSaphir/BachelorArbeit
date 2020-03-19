@@ -173,7 +173,7 @@ void UBA_GameInstance::OnFindSessionComplete(bool bWasSuccessful)
 
 
 
-bool UBA_GameInstance::JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult SearchResult)
+bool UBA_GameInstance::JoiningSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult SearchResult)
 {
 	bool bSuccessful = false;
 
@@ -269,7 +269,7 @@ void UBA_GameInstance::JoinOnlineSession()
 				{
 					SearchResult = SessionSearch->SearchResults[i];
 
-					JoinSession(Player->GetPreferredUniqueNetId().GetUniqueNetId(), GameSessionName, SearchResult);
+					JoiningSession(Player->GetPreferredUniqueNetId().GetUniqueNetId(), GameSessionName, SearchResult);
 					break;
 
 				}
