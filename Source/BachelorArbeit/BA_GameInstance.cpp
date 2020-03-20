@@ -38,7 +38,7 @@ bool UBA_GameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName 
 	if (OnlineSub)
 	{
 		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
-
+		UE_LOG(LogTemp, Warning, TEXT("OnlineSub"));
 		if (Sessions.IsValid() && UserId.IsValid())
 		{
 			SessionSettings = MakeShareable(new FOnlineSessionSettings());
@@ -64,6 +64,10 @@ bool UBA_GameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName 
 			OnCreateSessionComplete(SessionName, false);
 		}
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnlineSub empty"));
+	}
 
 
 	return false;
@@ -72,6 +76,7 @@ bool UBA_GameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName 
 
 void UBA_GameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
+	UE_LOG(LogTemp, Warning, TEXT("OnCreateSessionComplete"));
 
 	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
 	if (OnlineSub)
@@ -85,6 +90,8 @@ void UBA_GameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucce
 			{
 				OnStartSessionCompleteDelegateHandle = Sessions->AddOnStartSessionCompleteDelegate_Handle(OnStartSessionCompleteDelegate);
 				Sessions->StartSession(SessionName);
+				UE_LOG(LogTemp, Warning, TEXT("Starting Session"));
+
 			}
 		}
 	}
@@ -106,6 +113,8 @@ void UBA_GameInstance::OnStartOnlineGameComplete(FName SessionName, bool bWasSuc
 	{
 		UWorld* world = GetWorld();
 		UGameplayStatics::OpenLevel(this, "Map_AR", true, "listen");
+		UE_LOG(LogTemp, Warning, TEXT("Open Level"));
+
 	}
 }
 
