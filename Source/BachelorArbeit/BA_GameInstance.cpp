@@ -10,6 +10,7 @@
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/GameSession.h"
 #include "OnlineSubsystemTypes.h"
+#include "Engine/Engine.h"
 
 
 
@@ -38,7 +39,7 @@ bool UBA_GameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName 
 	if (OnlineSub)
 	{
 		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
-		UE_LOG(LogTemp, Warning, TEXT("OnlineSub"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("OnlineSub"));
 		if (Sessions.IsValid() && UserId.IsValid())
 		{
 			SessionSettings = MakeShareable(new FOnlineSessionSettings());
@@ -66,7 +67,7 @@ bool UBA_GameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName 
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OnlineSub empty"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("OnlineSub Empty"));
 	}
 
 
@@ -90,7 +91,7 @@ void UBA_GameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucce
 			{
 				OnStartSessionCompleteDelegateHandle = Sessions->AddOnStartSessionCompleteDelegate_Handle(OnStartSessionCompleteDelegate);
 				Sessions->StartSession(SessionName);
-				UE_LOG(LogTemp, Warning, TEXT("Starting Session"));
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Start Session"));
 
 			}
 		}
@@ -113,7 +114,7 @@ void UBA_GameInstance::OnStartOnlineGameComplete(FName SessionName, bool bWasSuc
 	{
 		UWorld* world = GetWorld();
 		UGameplayStatics::OpenLevel(this, "Map_AR", true, "listen");
-		UE_LOG(LogTemp, Warning, TEXT("Open Level"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Open Level"));
 
 	}
 }
