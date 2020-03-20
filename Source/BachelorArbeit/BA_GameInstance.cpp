@@ -38,10 +38,12 @@ bool UBA_GameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName 
 
 	if (OnlineSub)
 	{
-		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("OnlineSub"));
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
 		if (Sessions.IsValid() && UserId.IsValid())
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Session Valid"));
+
 			SessionSettings = MakeShareable(new FOnlineSessionSettings());
 
 			SessionSettings->bIsLANMatch = bIsLan;
@@ -62,6 +64,8 @@ bool UBA_GameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName 
 		}
 		else
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Session not Valid"));
+
 			OnCreateSessionComplete(SessionName, false);
 		}
 	}
