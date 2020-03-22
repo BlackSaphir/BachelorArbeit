@@ -173,10 +173,13 @@ void UBA_GameInstance::OnFindSessionComplete(bool bWasSuccessful)
 
 			Sessions->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegateHandle);
 
-			if (SessionSearch->SearchResults.Num() > 0 && bWasSuccessful == true)
+			if (SessionSearch->SearchState == EOnlineAsyncTaskState::Done)
 			{
+				if (SessionSearch->SearchResults.Num() > 0 && bWasSuccessful == true)
+				{
 
-				CanJoinSession = true;
+					CanJoinSession = true;
+				}
 			}
 
 			OnFindSessionsComplete.Broadcast(bWasSuccessful);
