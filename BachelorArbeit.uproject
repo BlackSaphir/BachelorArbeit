@@ -17,6 +17,13 @@
 	],
 	"Plugins": [
 		{
+			"Name": "AppleProResMedia",
+			"Enabled": true,
+			"SupportedTargetPlatforms": [
+				"Win64"
+			]
+		},
+		{
 			"Name": "AppleARKit",
 			"Enabled": true,
 			"SupportedTargetPlatforms": [
@@ -35,8 +42,14 @@
 			"Enabled": true
 		},
 		{
-			"Name": "RemoteSession",
-			"Enabled": true
+			"Name": "SteamVR",
+			"Enabled": false,
+			"SupportedTargetPlatforms": [
+				"Win32",
+				"Win64",
+				"Linux",
+				"Mac"
+			]
 		}
 	],
 	"TargetPlatforms": [
